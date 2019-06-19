@@ -2,6 +2,11 @@ import React, { Component } from 'react'
 import axios from 'axios'
 import socketIOClient from 'socket.io-client'
 
+const HUBS = [
+  'http://localhost:3003',
+  'http://localhost:3004'
+]
+
 class App extends Component {
   constructor () {
     super()
@@ -12,8 +17,7 @@ class App extends Component {
       friends: [],
       me: { key: '' },
       messages: {},
-      hubInput: 'http://localhost:3003',
-      hub: 'http://localhost:3003',
+      hubID: 0,
       apiInput: 'http://localhost:10000',
       api: 'http://localhost:10000'
     }
@@ -60,10 +64,11 @@ class App extends Component {
 
   async connect () {
     if (this.socket) this.socket.close()
+    let hub = HUBS[this.state.hubID]
 
-    await axios.post(`${this.state.hub}/join`, { public_key: this.state.me.key })
+    await axios.post(`${hub}/join`, { public_key: this.state.me.key })
 
-    let socket = socketIOClient(this.state.hub)
+    let socket = socketIOClient(hub)
     this.socket = socket
     this.socket.on('update', (msgs) => {
       console.log(msgs)
@@ -86,20 +91,6 @@ class App extends Component {
     }
   }
 
-  handleHubChange (e) {
-    this.setState({ hubInput: e.target.value })
-  }
-
-  handleHubKeyPress (e) {
-    if (e.key === 'Enter') {
-      this.setState({ hub: this.state.hubInput }, () => {
-        this.connect()
-      })
-
-      e.target.value = ''
-    }
-  }
-
   handleAPIChange (e) {
     this.setState({ apiInput: e.target.value })
   }
@@ -115,19 +106,35 @@ class App extends Component {
     }
   }
 
+  setHub (id) {
+    return () => {
+      this.setState({ hubID: id }, () => {
+        this.connect()
+      })
+    }
+  }
+
   render () {
     return (
       <div className='w-screen h-screen app' >
+        <div className='hubs bg-gray-500 pt-2'>
+          {HUBS.map((h, i) => {
+            return <div
+              className={`rounded-full bg-gray-700 flex justify-center items-center text-white text-xl mt-2 border-box border-white ${this.state.hubID === i ? 'border-2' : ''}`}
+              style={{ width: '50px', height: '50px', marginLeft: '3px' }}
+              key={i}
+              onClick={this.setHub(i).bind(this)}
+            >
+              {i}
+            </div>
+          })}
+        </div>
         <div className='sidebar bg-gray-200' >
           <div className='flex flex-col justify-between h-full'>
             <div className='overflow-y-auto p-2'>
               <div className='mb-4'>
                 <h2>P.me</h2>
                 <input className='p-1 border border-gray-500 rounded font-mono text-xs w-full bg-gray-200' value={this.state.apiInput} onChange={this.handleAPIChange.bind(this)} onKeyPress={this.handleAPIInputKeyPress.bind(this)} />
-              </div>
-              <div className='mb-4'>
-                <h2>Hub</h2>
-                <input className='p-1 border border-gray-500 rounded font-mono text-xs w-full bg-gray-200' value={this.state.hubInput} onChange={this.handleHubChange.bind(this)} onKeyPress={this.handleHubKeyPress.bind(this)} />
               </div>
               <h2>Topics</h2>
               <ul>
@@ -161,7 +168,7 @@ class App extends Component {
           <div id='end' ref={this.messageEndRef} />
         </div>
         <div className='prompt bg-blue'>
-          <input onKeyPress={this.onKeyPress.bind(this)} type='text' placeholder='say something...' className='border border-grey-100 w-full h-full p-2 rounded' />
+          <input onKeyPress={this.onKeyPress.bind(this)} type='text' placeholder='say something...' className='border border-grey-100 w-full h-full p-2 rounded border-box' />
         </div>
       </div>
     )
