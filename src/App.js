@@ -156,7 +156,7 @@ class App extends Component {
             </div>
             <div className='bg-gray-100 h-20 flex flex-col justify-around px-2'>
               <h2>@username</h2>
-              <input className='bg-gray-400 border border-gray-500 w-full' value={this.state.me.key} readOnly />
+              <input className='bg-gray-400 px-1 border border-gray-500 w-full' value={this.state.me.key} readOnly />
             </div>
           </div>
 
