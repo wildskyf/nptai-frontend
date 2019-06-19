@@ -1,4 +1,11 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
 body {
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
     "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -13,7 +20,7 @@ code {
 .app {
   display: grid;
   grid-template-columns: 250px 1fr;
-  grid-template-rows: 1fr 40px;
+  grid-template-rows: 1fr 80px;
 }
 
 .sidebar {
@@ -24,8 +31,4 @@ code {
 .prompt {
   grid-column: 2 / 3;
   grid-row: 2 / 3;
-}
-
-input {
-  box-sizing: border-box;
 }
