@@ -57,9 +57,8 @@ class App extends Component {
 
     res = await axios.get(`${this.state.api}/me`)
     let me = res.data.result
-    this.connect()
 
-    this.setState({ topics, friends, me })
+    this.setState({ topics, friends, me }, this.connect)
   }
 
   async connect () {
@@ -97,9 +96,9 @@ class App extends Component {
 
   handleAPIInputKeyPress (e) {
     if (e.key === 'Enter') {
-      this.setState({ api: this.state.apiInput }, () => {
-        this.load()
-        this.connect()
+      this.setState({ api: this.state.apiInput }, async () => {
+        await this.load()
+        await this.connect()
       })
 
       e.target.value = ''
