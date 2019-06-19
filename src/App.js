@@ -2,8 +2,6 @@ import React, { Component } from 'react'
 import axios from 'axios'
 import socketIOClient from 'socket.io-client'
 
-const API = 'http://localhost:10000'
-
 class App extends Component {
   constructor () {
     super()
@@ -15,7 +13,9 @@ class App extends Component {
       me: { key: '' },
       messages: {},
       hubInput: 'http://localhost:3003',
-      hub: 'http://localhost:3003'
+      hub: 'http://localhost:3003',
+      apiInput: 'http://localhost:10000',
+      api: 'http://localhost:10000'
     }
 
     this.messageEndRef = React.createRef()
@@ -38,20 +38,20 @@ class App extends Component {
   }
 
   async submit (msg) {
-    await axios.post(`${API}/topics/${this.state.currentTopic}`, { data: { id: Date.now(), message: msg } })
+    await axios.post(`${this.state.api}/topics/${this.state.currentTopic}`, { data: { id: Date.now(), message: msg } })
     this.scrollMessage()
   }
 
   async load () {
     let res
 
-    res = await axios.get(`${API}/topics`)
+    res = await axios.get(`${this.state.api}/topics`)
     let topics = res.data.result
 
-    res = await axios.get(`${API}/friends`)
+    res = await axios.get(`${this.state.api}/friends`)
     let friends = res.data.result
 
-    res = await axios.get(`${API}/me`)
+    res = await axios.get(`${this.state.api}/me`)
     let me = res.data.result
     this.connect()
 
@@ -100,12 +100,31 @@ class App extends Component {
     }
   }
 
+  handleAPIChange (e) {
+    this.setState({ apiInput: e.target.value })
+  }
+
+  handleAPIInputKeyPress (e) {
+    if (e.key === 'Enter') {
+      this.setState({ api: this.state.apiInput }, () => {
+        this.load()
+        this.connect()
+      })
+
+      e.target.value = ''
+    }
+  }
+
   render () {
     return (
       <div className='w-screen h-screen app' >
         <div className='sidebar bg-gray-200' >
           <div className='flex flex-col justify-between h-full'>
             <div className='overflow-y-auto p-2'>
+              <div className='mb-4'>
+                <h2>P.me</h2>
+                <input className='p-1 border border-gray-500 rounded font-mono text-xs w-full bg-gray-200' value={this.state.apiInput} onChange={this.handleAPIChange.bind(this)} onKeyPress={this.handleAPIInputKeyPress.bind(this)} />
+              </div>
               <div className='mb-4'>
                 <h2>Hub</h2>
                 <input className='p-1 border border-gray-500 rounded font-mono text-xs w-full bg-gray-200' value={this.state.hubInput} onChange={this.handleHubChange.bind(this)} onKeyPress={this.handleHubKeyPress.bind(this)} />
